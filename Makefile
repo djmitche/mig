@@ -306,8 +306,11 @@ worker-compliance-item:
 doc:
 	make -C doc doc
 
-test: mig-agent
+test-agent: mig-agent
 	$(BINDIR)/mig-agent-latest -m=file '{"searches": {"shouldmatch": {"names": ["^root"],"sizes": ["<10m"],"options": {"matchall": true},"paths": ["/etc/passwd"]},"shouldnotmatch": {"options": {"maxdepth": 1},"paths": ["/tmp"],"contents": ["should not match"]}}}'
+
+test:
+	$(GO) test -v `find src/mig -name '*_test.go' | xargs -n 1 dirname | sed -e 's!^src/!!' | sort -u`
 
 clean-agent:
 	find bin/ -name mig-agent* -exec rm {} \;

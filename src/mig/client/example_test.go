@@ -6,11 +6,12 @@
 package client_test
 
 import (
-	"fmt"
 	"mig/client"
+	"testing"
 )
 
-func ExampleGetAction() {
+func TestGetAction(t *testing.T) {
+	t.Skip("Needs to use depenency injection to stub out the GPG and HTTP bits")
 	conf := client.Configuration{
 		API: client.ApiConf{
 			URL: "http://localhost:12345/api/v1/",
@@ -21,11 +22,11 @@ func ExampleGetAction() {
 		},
 	}
 	conf.Homedir = client.FindHomedir()
-	cli := client.NewClient(conf)
+	cli := client.NewClient(conf, "1.2.3")
 	a, _, err := cli.GetAction(1234567890)
 	if err != nil {
-		fmt.Println(err)
+		t.Error(err)
 	} else {
-		fmt.Println(a.ID, a.Name, a.Target)
+		t.Error(a.ID, a.Name, a.Target)
 	}
 }

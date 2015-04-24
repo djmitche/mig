@@ -98,7 +98,7 @@ func (r Runner) ValidateParameters() (err error) {
 	return
 }
 
-// Run *must* be implemented by a module. Its the function that executes the module.
+// Run *must* be implemented by a module. It is the function that executes the module.
 // It must return a string, that is typically a marshalled json struct that contains
 // the results of the execution.
 func (r Runner) Run(Args []byte) string {
