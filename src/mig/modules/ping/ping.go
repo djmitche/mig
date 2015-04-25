@@ -147,6 +147,7 @@ func (r *Runner) ValidateParameters() (err error) {
 	// if ip == nil, destination may not be a hostname.
 	if err != nil {
 		ip = r.Parameters.Destination
+        err = nil
 	} else {
 		if len(ips) == 0 {
 			return fmt.Errorf("FQDN does not resolve to any known ip")
