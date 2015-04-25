@@ -19,6 +19,8 @@ func TestValidateParameters(t *testing.T) {
 		{"invalid_hostname", false},
 		{"invalid hostname", false},
 		{"http://mozilla.org", false},
+		// an empty string indicates "don't look up a host" and is valid
+		{"", true},
 	}
 
 	r := new(Runner)

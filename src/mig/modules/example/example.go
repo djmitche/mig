@@ -92,7 +92,8 @@ type statistics struct {
 // It must return an error if the parameters do not validate.
 func (r Runner) ValidateParameters() (err error) {
 	fqdn := regexp.MustCompilePOSIX(`^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$`)
-	if !fqdn.MatchString(r.Parameters.LookupHost) {
+    lh := r.Parameters.LookupHost
+	if lh != "" && !fqdn.MatchString(lh) {
 		return fmt.Errorf("ValidateParameters: LookupHost parameter is not a valid FQDN.")
 	}
 	return
