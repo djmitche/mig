@@ -2,6 +2,7 @@ package example
 
 import (
 	"encoding/json"
+	"github.com/bmizerany/assert"
 	"mig/testutil"
 	"net"
 	"testing"
@@ -55,7 +56,7 @@ func TestRunInvalidLookupHost(t *testing.T) {
 func TestRunLookupHost(t *testing.T) {
 	r := new(Runner)
 	r.lookupHostFn = func(name string) (addrs []string, err error) {
-		testutil.Assert(t, name == "myhost", "wrong hostname passed to LookupHost")
+		assert.Equal(t, name, "myhost")
 		var rv []string
 		rv = append(rv, "1.2.3.4")
 		rv = append(rv, "5.6.7.8")
@@ -63,12 +64,11 @@ func TestRunLookupHost(t *testing.T) {
 	}
 	res, marshalled := testutil.RunModule(t, r, params{false, false, "myhost"})
 	testutil.AssertModuleSucceeded(t, res)
-	testutil.Assert(t, res.FoundAnything, "FoundAnything not set")
+	assert.Equal(t, res.FoundAnything, true)
 
 	modres := unmarshal(t, marshalled)
-	testutil.Assert(t, modres.Statistics.StuffFound == 2, "statistics.StuffFound != 2")
-	testutil.Assertf(t, modres.Elements.LookedUpHost == "myhost=1.2.3.4, 5.6.7.8",
-		"LookedUpHost is incorrect: %v", modres.Elements.LookedUpHost)
+	assert.Equal(t, modres.Statistics.StuffFound, int64(2))
+	assert.Equal(t, modres.Elements.LookedUpHost, "myhost=1.2.3.4, 5.6.7.8")
 }
 
 func TestRunGetHostname(t *testing.T) {
@@ -78,11 +78,11 @@ func TestRunGetHostname(t *testing.T) {
 	}
 	res, marshalled := testutil.RunModule(t, r, params{true, false, ""})
 	testutil.AssertModuleSucceeded(t, res)
-	testutil.Assert(t, res.FoundAnything, "FoundAnything not set")
+	assert.Equal(t, res.FoundAnything, true)
 
 	modres := unmarshal(t, marshalled)
-	testutil.Assert(t, modres.Statistics.StuffFound == 1, "statistics.StuffFound != 1")
-	testutil.Assert(t, modres.Elements.Hostname == "myhostname", "HostName is empty")
+	assert.Equal(t, modres.Statistics.StuffFound, int64(1))
+	assert.Equal(t, modres.Elements.Hostname, "myhostname")
 }
 
 func TestRunGetAddresses(t *testing.T) {
@@ -96,9 +96,9 @@ func TestRunGetAddresses(t *testing.T) {
 	}
 	res, marshalled := testutil.RunModule(t, r, params{false, true, ""})
 	testutil.AssertModuleSucceeded(t, res)
-	testutil.Assert(t, res.FoundAnything, "FoundAnything not set")
+	assert.Equal(t, res.FoundAnything, true)
 
 	modres := unmarshal(t, marshalled)
-	testutil.Assert(t, modres.Statistics.StuffFound == 1, "statistics.StuffFound != 1")
-	testutil.Assert(t, modres.Elements.Addresses[0] == "128.135.11.1/24", "Addresses is empty")
+	assert.Equal(t, modres.Statistics.StuffFound, int64(1))
+	assert.Equal(t, modres.Elements.Addresses[0], "128.135.11.1/24")
 }

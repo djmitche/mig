@@ -140,7 +140,10 @@ ifeq ($(OS),linux)
 	echo '* apt-get install libreadline-dev'
 endif
 
-go_get_deps: go_get_common_deps go_get_agent_deps go_get_platform_deps go_get_client_deps
+go_get_test_deps: go_get_common_deps
+	$(GOGETTER) github.com/bmizerany/assert
+
+go_get_deps: go_get_common_deps go_get_agent_deps go_get_platform_deps go_get_client_deps go_get_test_deps
 
 go_get_deps_into_system:
 	make GOGETTER="go get -u" go_get_deps
