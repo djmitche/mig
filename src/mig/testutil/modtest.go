@@ -12,7 +12,7 @@ func unexpectedErrors(t *testing.T, errors []string) {
     }
 }
 
-func RunModule(t *testing.T, m mig.Moduler, args interface{}) mig.ModuleResult {
+func RunModule(t *testing.T, m mig.Moduler, args interface{}) (mig.ModuleResult, []byte) {
     var marshalled_args []byte
     marshalled_args, err := json.Marshal(args)
     if (err != nil) {
@@ -28,7 +28,7 @@ func RunModule(t *testing.T, m mig.Moduler, args interface{}) mig.ModuleResult {
     if (err != nil) {
         t.Error(err)
     }
-    return res
+    return res, marshalled_res
 }
 
 func AssertModuleSucceeded(t *testing.T, res mig.ModuleResult) {

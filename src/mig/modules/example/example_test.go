@@ -1,8 +1,9 @@
 package example
 
 import (
-	"mig/testutil"
-	"testing"
+    "encoding/json"
+    "testing"
+    "mig/testutil"
 )
 
 type validatetest struct {
@@ -36,8 +37,36 @@ func TestValidateParameters(t *testing.T) {
 	}
 }
 
+func unmarshal(t *testing.T, marshalled []byte) (res results) {
+    err := json.Unmarshal(marshalled, &res)
+    if err != nil {
+        t.Fatal(err)
+    }
+    return
+}
+
 func TestRunInvalidLookupHost(t *testing.T) {
-	res := testutil.RunModule(t, new(Runner), params{false, false, "in valid"})
-	testutil.AssertModuleError(t, res,
-		"ValidateParameters: LookupHost parameter is not a valid FQDN.")
+    res, _ := testutil.RunModule(t, new(Runner), params{false, false, "in valid"})
+    testutil.AssertModuleError(t, res,
+        "ValidateParameters: LookupHost parameter is not a valid FQDN.")
+}
+
+func TestRunGetHostname(t *testing.T) {
+    res, marshalled := testutil.RunModule(t, new(Runner), params{true, false, ""})
+    testutil.AssertModuleSucceeded(t, res)
+    testutil.Assert(t, res.FoundAnything, "FoundAnything not set")
+    
+    modres := unmarshal(t, marshalled)
+    testutil.Assert(t, modres.Statistics.StuffFound == 1, "statistics.StuffFound != 1")
+    testutil.Assert(t, modres.Elements.Hostname != "", "HostName is empty")
+}
+
+func TestRunGetAddresses(t *testing.T) {
+    res, marshalled := testutil.RunModule(t, new(Runner), params{false, true, ""})
+    testutil.AssertModuleSucceeded(t, res)
+    testutil.Assert(t, res.FoundAnything, "FoundAnything not set")
+    
+    modres := unmarshal(t, marshalled)
+    testutil.Assert(t, modres.Statistics.StuffFound == 1, "statistics.StuffFound != 1")
+    testutil.Assert(t, len(modres.Elements.Addresses) != 0, "Addresses is empty")
 }
