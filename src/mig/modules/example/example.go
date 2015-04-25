@@ -42,7 +42,11 @@ import (
 // agent knows we exist
 func init() {
 	mig.RegisterModule("example", func() interface{} {
-		return new(Runner)
+		r := new(Runner)
+		r.hostnameFn = os.Hostname
+		r.interfaceAddrsFn = net.InterfaceAddrs
+		r.lookupHostFn = net.LookupHost
+		return r
 	})
 }
 
@@ -50,6 +54,11 @@ func init() {
 type Runner struct {
 	Parameters params
 	Results    results
+
+	// dependency injections
+	hostnameFn       func() (string, error)
+	interfaceAddrsFn func() ([]net.Addr, error)
+	lookupHostFn     func(name string) (addrs []string, err error)
 }
 
 // a simple parameters structure, the format is arbitrary
@@ -92,7 +101,7 @@ type statistics struct {
 // It must return an error if the parameters do not validate.
 func (r Runner) ValidateParameters() (err error) {
 	fqdn := regexp.MustCompilePOSIX(`^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$`)
-    lh := r.Parameters.LookupHost
+	lh := r.Parameters.LookupHost
 	if lh != "" && !fqdn.MatchString(lh) {
 		return fmt.Errorf("ValidateParameters: LookupHost parameter is not a valid FQDN.")
 	}
@@ -123,7 +132,7 @@ func (r Runner) Run(Args []byte) string {
 
 	// grab the hostname of the endpoint
 	if r.Parameters.GetHostname {
-		hostname, err := os.Hostname()
+		hostname, err := r.hostnameFn()
 		if err != nil {
 			r.Results.Errors = append(r.Results.Errors, fmt.Sprintf("%v", err))
 			return r.buildResults()
@@ -134,7 +143,7 @@ func (r Runner) Run(Args []byte) string {
 
 	// grab the local ip addresses
 	if r.Parameters.GetAddresses {
-		addresses, err := net.InterfaceAddrs()
+		addresses, err := r.interfaceAddrsFn()
 		if err != nil {
 			r.Results.Errors = append(r.Results.Errors, fmt.Sprintf("%v", err))
 			return r.buildResults()
@@ -151,7 +160,7 @@ func (r Runner) Run(Args []byte) string {
 	// look up a host
 	if r.Parameters.LookupHost != "" {
 		r.Results.Elements.LookedUpHost = r.Parameters.LookupHost + "="
-		addresses, err := net.LookupHost(r.Parameters.LookupHost)
+		addresses, err := r.lookupHostFn(r.Parameters.LookupHost)
 		if err != nil {
 			r.Results.Errors = append(r.Results.Errors, fmt.Sprintf("%v", err))
 			return r.buildResults()
